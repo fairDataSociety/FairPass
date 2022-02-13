@@ -5,8 +5,10 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
 	"github.com/onepeerlabs/bal/internal/utils"
+	"github.com/onepeerlabs/bal/internal/utils/crypto"
 )
 
 const (
@@ -16,12 +18,15 @@ const (
 type index struct {
 	fyne.Window
 
-	app  fyne.App
-	view *fyne.Container
+	app      fyne.App
+	view     *fyne.Container
+	progress dialog.Dialog
 
-	config  *fairOSConfig
-	dfsAPI  *dfs.DfsAPI
-	dataDir string
+	config    *fairOSConfig
+	dfsAPI    *dfs.DfsAPI
+	dataDir   string
+	sessionID string
+	encryptor *crypto.Encryptor
 }
 
 func Make(a fyne.App, w fyne.Window) fyne.CanvasObject {

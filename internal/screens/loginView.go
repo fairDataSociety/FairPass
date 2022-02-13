@@ -7,20 +7,20 @@ import (
 	"os"
 	"path/filepath"
 
-	"fyne.io/fyne/v2/dialog"
-
-	"github.com/sirupsen/logrus"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/logging"
+	dfsUtils "github.com/fairdatasociety/fairOS-dfs/pkg/utils"
 	"github.com/onepeerlabs/bal/internal/utils"
+	"github.com/onepeerlabs/bal/internal/utils/crypto"
+	"github.com/sirupsen/logrus"
 )
 
 type fairOSConfig struct {
@@ -96,7 +96,36 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	password.Hide()
 	var username string
 	loginBtn := widget.NewButton("Login", func() {
+		i.progress = dialog.NewProgressInfinite("", "Login is progress", i)
+		i.progress.Show()
+		defer i.progress.Hide()
 		// Do login
+		ui, err := i.dfsAPI.LoginUser(username, password.Text, "")
+		if err != nil {
+			fmt.Printf("Login Failed : %s", err.Error())
+			return
+		}
+		_, enBytes, err := ui.GetFeed().GetFeedData(dfsUtils.HashString(username), ui.GetAccount().GetAddress(-1))
+		if err != nil {
+			fmt.Printf("Login Failed : %s", err.Error())
+			return
+		}
+		i.encryptor = crypto.New(string(enBytes))
+		i.sessionID = ui.GetSessionId()
+		if !i.dfsAPI.IsPodExist(utils.PodName, i.sessionID) {
+			_, err = i.dfsAPI.CreatePod(utils.PodName, password.Text, i.sessionID)
+			if err != nil {
+				fmt.Printf("Create Pod Failed : %s", err.Error())
+				return
+			}
+		} else {
+			_, err = i.dfsAPI.OpenPod(utils.PodName, password.Text, i.sessionID)
+			if err != nil {
+				fmt.Printf("Open pod Failed : %s", err.Error())
+				return
+			}
+		}
+		i.setContent(widget.NewLabel("Ok Loggedin"))
 	})
 	loginBtn.Hide()
 	combo := widget.NewSelect(users, func(value string) {
@@ -161,12 +190,16 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 		if user.Password == "" {
 			return
 		}
+		i.progress = dialog.NewProgressInfinite("", "Creating User", i.Window)
+		i.progress.Show()
 		// Do signup
 		address, mnemonic, _, err := i.dfsAPI.CreateUser(user.Username, user.Password, "", "")
 		if err != nil {
 			fmt.Printf("Failed to create user : %s", err.Error())
+			i.progress.Hide()
 			return
 		}
+		i.progress.Hide()
 		fmt.Printf("User %s got created \n%s\n%s\n", user.Username, address, mnemonic)
 		d := dialog.NewCustomConfirm("Caution !!", "Yes, I have kept is safe", "Cancel", i.displayMnemonic(address, mnemonic), func(b bool) {
 			i.Reload()
@@ -186,7 +219,7 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 }
 
 func (i *index) displayMnemonic(address, mnemonic string) fyne.CanvasObject {
-	header := widget.NewLabel("Please keep the following safe. If these are lost you cannot recover your data")
+	header := labelWithStyle("Please keep the following safe. If these are lost you cannot recover your data")
 	addressLabel := widget.NewLabel(address)
 	mnemonicLabel := widget.NewLabel(mnemonic)
 
@@ -264,7 +297,10 @@ func (i *index) importTab(allowBack bool) fyne.CanvasObject {
 		if user.Address == "" {
 			return
 		}
-		// Do import
+		i.progress = dialog.NewProgressInfinite("", "Importing user", i)
+		i.progress.Show()
+		defer i.progress.Hide()
+		// TODO import
 		i.Reload()
 	})
 	saveBtn.Importance = widget.HighImportance
