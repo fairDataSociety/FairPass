@@ -7,12 +7,12 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
-	"github.com/onepeerlabs/bal/internal/utils"
-	"github.com/onepeerlabs/bal/internal/utils/crypto"
+	"github.com/onepeerlabs/fairpass/internal/utils"
+	"github.com/onepeerlabs/fairpass/internal/utils/crypto"
 )
 
 const (
-	config = ".bal.conf"
+	config = ".fairpass.conf"
 )
 
 type index struct {

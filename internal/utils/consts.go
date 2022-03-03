@@ -1,11 +1,11 @@
 package utils
 
 const (
-	PackageName    = "onepeerlabs.bal"
-	DataDirName    = ".bal"
-	PodName        = "bal"
+	PackageName    = "onepeerlabs.fairpass"
+	DataDirName    = ".fairpass"
+	PodName        = "fairpass"
 	PasswordsTable = "passwords"
 	NotesTable     = "notes"
-	AppName        = "Bal"
-	LoginWelcome   = "Bee Associated Locker"
+	AppName        = "FairPass"
+	LoginWelcome   = "FairPass"
 )

@@ -18,8 +18,8 @@ import (
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/logging"
 	dfsUtils "github.com/fairdatasociety/fairOS-dfs/pkg/utils"
-	"github.com/onepeerlabs/bal/internal/utils"
-	"github.com/onepeerlabs/bal/internal/utils/crypto"
+	"github.com/onepeerlabs/fairpass/internal/utils"
+	"github.com/onepeerlabs/fairpass/internal/utils/crypto"
 	"github.com/sirupsen/logrus"
 )
 
@@ -125,7 +125,8 @@ func (i *index) initLoginView() fyne.CanvasObject {
 				return
 			}
 		}
-		i.setContent(widget.NewLabel("Ok Loggedin"))
+		main := newMainView(i)
+		i.setContent(main.view)
 	})
 	loginBtn.Hide()
 	combo := widget.NewSelect(users, func(value string) {

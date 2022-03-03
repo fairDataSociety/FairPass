@@ -1,10 +1,12 @@
-module github.com/onepeerlabs/bal
+module github.com/onepeerlabs/fairpass
 
 go 1.17
 
 require (
 	fyne.io/fyne/v2 v2.1.2
 	github.com/fairdatasociety/fairOS-dfs v0.7.3
+	github.com/google/uuid v1.1.4
+	github.com/sethvargo/go-password v0.2.0
 	github.com/sirupsen/logrus v1.8.1
 )
 
