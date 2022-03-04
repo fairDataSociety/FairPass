@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/fairdatasociety/fairOS-dfs/pkg/collection"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/logging"
 	dfsUtils "github.com/fairdatasociety/fairOS-dfs/pkg/utils"
@@ -56,7 +57,7 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		return i.view
 	}
 	if i.dfsAPI == nil {
-		logger := logging.New(os.Stdout, logrus.DebugLevel)
+		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		api, err := dfs.NewDfsAPI(
 			i.dataDir,
 			i.config.BeeEndpoint,
@@ -112,19 +113,49 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		}
 		i.encryptor = crypto.New(string(enBytes))
 		i.sessionID = ui.GetSessionId()
+		i.password = password.Text
 		if !i.dfsAPI.IsPodExist(utils.PodName, i.sessionID) {
-			_, err = i.dfsAPI.CreatePod(utils.PodName, password.Text, i.sessionID)
+			_, err = i.dfsAPI.CreatePod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
 				fmt.Printf("Create Pod Failed : %s", err.Error())
 				return
 			}
 		} else {
-			_, err = i.dfsAPI.OpenPod(utils.PodName, password.Text, i.sessionID)
+			_, err = i.dfsAPI.OpenPod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
 				fmt.Printf("Open pod Failed : %s", err.Error())
 				return
 			}
 		}
+		passwordIndexes := make(map[string]collection.IndexType)
+		passwordIndexes["domain"] = collection.StringIndex
+		passwordIndexes["username"] = collection.StringIndex
+		passwordIndexes["password"] = collection.StringIndex
+		passwordIndexes["starred"] = collection.StringIndex
+		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.PasswordsTable, passwordIndexes, true)
+		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
+			fmt.Printf("Failed to create doc table : %s", err.Error())
+			return
+		}
+		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.PasswordsTable)
+		if err != nil {
+			fmt.Printf("Failed to open doc table : %s", err.Error())
+			return
+		}
+		notesIndexes := make(map[string]collection.IndexType)
+		notesIndexes["title"] = collection.StringIndex
+		notesIndexes["starred"] = collection.StringIndex
+		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.NotesTable, notesIndexes, true)
+		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
+			fmt.Printf("Failed to create doc table : %s", err.Error())
+			return
+		}
+		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.NotesTable)
+		if err != nil {
+			fmt.Printf("Failed to open doc table : %s", err.Error())
+			return
+		}
+
 		main := newMainView(i)
 		i.setContent(main.view)
 	})

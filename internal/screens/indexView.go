@@ -26,6 +26,7 @@ type index struct {
 	dfsAPI    *dfs.DfsAPI
 	dataDir   string
 	sessionID string
+	password  string
 	encryptor *crypto.Encryptor
 }
 
