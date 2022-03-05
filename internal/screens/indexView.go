@@ -7,8 +7,8 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
-	"github.com/onepeerlabs/fairpass/internal/utils"
-	"github.com/onepeerlabs/fairpass/internal/utils/crypto"
+	"github.com/fairdatasociety/fairpass/internal/utils"
+	"github.com/fairdatasociety/fairpass/internal/utils/crypto"
 )
 
 const (

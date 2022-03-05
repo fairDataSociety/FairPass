@@ -11,8 +11,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/fairdatasociety/fairpass/internal/utils"
 	"github.com/google/uuid"
-	"github.com/onepeerlabs/fairpass/internal/utils"
 )
 
 func (main *mainView) makeAddNoteView(i *note) fyne.CanvasObject {

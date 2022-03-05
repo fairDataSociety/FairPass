@@ -3,8 +3,8 @@ package main
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"github.com/onepeerlabs/fairpass/internal/screens"
-	"github.com/onepeerlabs/fairpass/internal/utils"
+	"github.com/fairdatasociety/fairpass/internal/screens"
+	"github.com/fairdatasociety/fairpass/internal/utils"
 )
 
 func main() {

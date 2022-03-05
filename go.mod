@@ -1,4 +1,4 @@
-module github.com/onepeerlabs/fairpass
+module github.com/fairdatasociety/fairpass
 
 go 1.17
 

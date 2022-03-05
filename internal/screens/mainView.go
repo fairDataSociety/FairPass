@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/onepeerlabs/fairpass/internal/utils"
+	"github.com/fairdatasociety/fairpass/internal/utils"
 )
 
 type password struct {

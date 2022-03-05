@@ -1,7 +1,7 @@
 package utils
 
 const (
-	PackageName    = "onepeerlabs.fairpass"
+	PackageName    = "fairdatasociety.fairpass"
 	DataDirName    = ".fairpass"
 	PodName        = "fairpass"
 	PasswordsTable = "passwords"

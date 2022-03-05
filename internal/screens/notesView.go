@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
-	"github.com/onepeerlabs/fairpass/internal/utils"
+	"github.com/fairdatasociety/fairpass/internal/utils"
 )
 
 type notesListView struct {

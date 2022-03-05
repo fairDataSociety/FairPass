@@ -19,8 +19,8 @@ import (
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/logging"
 	dfsUtils "github.com/fairdatasociety/fairOS-dfs/pkg/utils"
-	"github.com/onepeerlabs/fairpass/internal/utils"
-	"github.com/onepeerlabs/fairpass/internal/utils/crypto"
+	"github.com/fairdatasociety/fairpass/internal/utils"
+	"github.com/fairdatasociety/fairpass/internal/utils/crypto"
 	"github.com/sirupsen/logrus"
 )
 
@@ -56,6 +56,10 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		i.view = container.NewPadded(container.NewCenter(widget.NewLabel(fmt.Sprintf("Failed to load config : %s", err.Error()))))
 		return i.view
 	}
+	configButton := widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
+		i.setContent(i.initConfigView(true))
+	})
+	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	if i.dfsAPI == nil {
 		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		api, err := dfs.NewDfsAPI(
@@ -66,7 +70,7 @@ func (i *index) initLoginView() fyne.CanvasObject {
 			logger,
 		)
 		if err != nil {
-			i.view = container.NewPadded(container.NewCenter(widget.NewLabel(fmt.Sprintf("Failed to connect with bee : %s", err.Error()))))
+			i.view = container.NewBorder(topContent, nil, nil, nil, container.NewCenter(widget.NewLabel(fmt.Sprintf("Failed to connect with bee : %s", err.Error()))))
 			return i.view
 		}
 		i.dfsAPI = api
@@ -103,12 +107,12 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		// Do login
 		ui, err := i.dfsAPI.LoginUser(username, password.Text, "")
 		if err != nil {
-			fmt.Printf("Login Failed : %s", err.Error())
+			fmt.Printf("Login Failed : %s\n", err.Error())
 			return
 		}
 		_, enBytes, err := ui.GetFeed().GetFeedData(dfsUtils.HashString(username), ui.GetAccount().GetAddress(-1))
 		if err != nil {
-			fmt.Printf("Login Failed : %s", err.Error())
+			fmt.Printf("Login Failed : %s\n", err.Error())
 			return
 		}
 		i.encryptor = crypto.New(string(enBytes))
@@ -117,13 +121,13 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		if !i.dfsAPI.IsPodExist(utils.PodName, i.sessionID) {
 			_, err = i.dfsAPI.CreatePod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
-				fmt.Printf("Create Pod Failed : %s", err.Error())
+				fmt.Printf("Create Pod Failed : %s\n", err.Error())
 				return
 			}
 		} else {
 			_, err = i.dfsAPI.OpenPod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
-				fmt.Printf("Open pod Failed : %s", err.Error())
+				fmt.Printf("Open pod Failed : %s\n", err.Error())
 				return
 			}
 		}
@@ -134,12 +138,12 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		passwordIndexes["starred"] = collection.StringIndex
 		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.PasswordsTable, passwordIndexes, true)
 		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
-			fmt.Printf("Failed to create doc table : %s", err.Error())
+			fmt.Printf("Failed to create doc table : %s\n", err.Error())
 			return
 		}
 		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.PasswordsTable)
 		if err != nil {
-			fmt.Printf("Failed to open doc table : %s", err.Error())
+			fmt.Printf("Failed to open doc table : %s\n", err.Error())
 			return
 		}
 		notesIndexes := make(map[string]collection.IndexType)
@@ -147,12 +151,12 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		notesIndexes["starred"] = collection.StringIndex
 		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.NotesTable, notesIndexes, true)
 		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
-			fmt.Printf("Failed to create doc table : %s", err.Error())
+			fmt.Printf("Failed to create doc table : %s\n", err.Error())
 			return
 		}
 		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.NotesTable)
 		if err != nil {
-			fmt.Printf("Failed to open doc table : %s", err.Error())
+			fmt.Printf("Failed to open doc table : %s\n", err.Error())
 			return
 		}
 
@@ -169,10 +173,6 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		i.setContent(i.initSignupView(true))
 	})
 	bottomContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), addButton))
-	configButton := widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		i.setContent(i.initConfigView(true))
-	})
-	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	return container.NewBorder(topContent, bottomContent, nil, nil, container.NewCenter(container.NewVBox(t, combo, password, loginBtn)))
 }
 
@@ -227,7 +227,7 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 		// Do signup
 		address, mnemonic, _, err := i.dfsAPI.CreateUser(user.Username, user.Password, "", "")
 		if err != nil {
-			fmt.Printf("Failed to create user : %s", err.Error())
+			fmt.Printf("Failed to create user : %s\n", err.Error())
 			i.progress.Hide()
 			return
 		}
@@ -392,6 +392,7 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 			fmt.Println("config write failed ", err)
 			return
 		}
+		i.dfsAPI = nil
 		i.setContent(i.initLoginView())
 	})
 	saveBtn.Importance = widget.HighImportance
