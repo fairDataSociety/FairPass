@@ -30,7 +30,10 @@ go run main.go
 fyne package -os darwin -icon myapp.png
 fyne package -os linux -icon myapp.png
 fyne package -os windows -icon myapp.png
-fyne package -os android -icon myapp.png  // assuming android development environment is setup
+
+
+fyne package -os android -appID org.fairdatasociety.fairpass -icon myapp.png 
+fyne package -os ios -appID org.fairdatasociety.fairpass -icon myapp.png
 ```
 
 ## Contribute
