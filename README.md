@@ -22,6 +22,10 @@ Do not expect it to be bug free reliable (yet).
 ### Install fyne
 ```
 go install fyne.io/fyne/v2/cmd/fyne@latest
+```
+
+### Run
+```
 go run main.go
 ```
 ## Packaging
