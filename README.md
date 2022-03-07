@@ -47,6 +47,3 @@ fyne package -os ios -appID org.fairdatasociety.fairpass -icon myapp.png
 - [Fyne](https://github.com/fyne-io/fyne) for the UI toolkit
 - [go-password](github.com/sethvargo/go-password) for password generation
 
-
-
-
