@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	fyne.io/fyne/v2 v2.1.2
-	github.com/fairdatasociety/fairOS-dfs v0.7.3
+	github.com/fairdatasociety/fairOS-dfs v0.7.3-0.20220214112014-eef257b1976a
 	github.com/google/uuid v1.1.4
 	github.com/sethvargo/go-password v0.2.0
 	github.com/sirupsen/logrus v1.8.1
@@ -46,5 +46,3 @@ require (
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
-
-replace github.com/fairdatasociety/fairOS-dfs => ../../fairdatasociety/fairOS-dfs
