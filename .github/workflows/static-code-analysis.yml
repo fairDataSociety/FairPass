@@ -1,4 +1,4 @@
-name: static-code-analysis
+name: Static code analysis
 on: push
 
 jobs:
@@ -25,4 +25,4 @@ jobs:
     - name: Run goimports
       run: test -z $(find . -name '*.go' -type f | xargs goimports -e -d | tee /dev/stderr)
     - name: Run staticcheck
-      run: staticcheck github.com/gitcoindev/FairPass/...
+      run: staticcheck ./...
