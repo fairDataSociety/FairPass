@@ -121,7 +121,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 	var top fyne.CanvasObject
 	if i.ID == "" {
 		saveBtn := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), func() {
-			main.index.progress = dialog.NewProgressInfinite("", "Saving Password", main.index)
+			main.index.progress = dialog.NewProgressInfinite("", "Saving Password", main.index) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 			main.index.progress.Show()
 			defer main.index.progress.Hide()
 			if i.Domain == "" {
