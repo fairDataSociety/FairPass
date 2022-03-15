@@ -51,16 +51,3 @@ jobs:
       run: go install fyne.io/fyne/v2/cmd/fyne@latest
     - name: Build
       run: fyne-cross android -app-id org.fairdatasociety.fairpass -icon icon.png
-
-  build_darwin:
-    runs-on: skycoin/fyne-cross:latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-    - name: Install fyne
-      run: go install fyne.io/fyne/v2/cmd/fyne@latest
-    - name: Build
-      run: fyne-cross darwin -app-id org.fairdatasociety.fairpass -icon icon.png
