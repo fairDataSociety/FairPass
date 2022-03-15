@@ -20,7 +20,7 @@ jobs:
     - name: Install fyne
       run: go install fyne.io/fyne/v2/cmd/fyne@latest
     - name: Build
-      run: fyne-cross linux -app-id org.fairdatasociety.fairpass
+      run: fyne-cross linux -app-id org.fairdatasociety.fairpass -icon icon.png
   
   build_windows:
     runs-on: ubuntu-latest
@@ -35,4 +35,4 @@ jobs:
     - name: Install fyne
       run: go install fyne.io/fyne/v2/cmd/fyne@latest
     - name: Build
-      run: fyne-cross windows -app-id org.fairdatasociety.fairpass
+      run: fyne-cross windows -app-id org.fairdatasociety.fairpass -icon icon.png
