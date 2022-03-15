@@ -20,5 +20,5 @@ jobs:
     - name: Install fine-cross compiler
       run: go install github.com/fyne-io/fyne-cross@latest    
     - name: Build
-      run: fyne-cross linux --app-id org.fairdatasociety.fairpass
+      run: fyne-cross linux -app-id org.fairdatasociety.fairpass
     
