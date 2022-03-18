@@ -70,6 +70,8 @@ func newListView(mainView *mainView) *listView {
 			}
 		},
 	)
+	table.SetColumnWidth(1, 250)
+	table.SetColumnWidth(2, 200)
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row == 0 {
 			return
