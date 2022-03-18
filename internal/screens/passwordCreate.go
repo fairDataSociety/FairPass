@@ -1,6 +1,7 @@
 package screens
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,12 +12,20 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/fairdatasociety/fairpass/internal/utils"
 	"github.com/google/uuid"
 	generator "github.com/sethvargo/go-password/password"
 )
+
+type PasswordRecord struct {
+	Description string
+	URL         string
+	Login       string
+	Password    string
+}
 
 func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 	if i == nil {
@@ -119,6 +128,79 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 	})
 
 	var top fyne.CanvasObject
+	importCsvBtn := widget.NewButton("Import .csv file", func() {
+		file_Dialog := dialog.NewFileOpen(
+			func(r fyne.URIReadCloser, _ error) {
+				// read csv values using csv.Reader
+				csvReader := csv.NewReader(r)
+				data, err := csvReader.ReadAll()
+				if err != nil {
+					fmt.Println("Failed to read CSV file!")
+				}
+
+				var passwordList []PasswordRecord
+				for idx, line := range data {
+					if idx > 0 { // omit header line
+						var rec PasswordRecord
+						for j, field := range line {
+							if j == 0 {
+								rec.Description = field
+							} else if j == 1 {
+								rec.URL = field
+							} else if j == 2 {
+								rec.Login = field
+							} else if j == 3 {
+								rec.Password = field
+							}
+						}
+						main.index.progress = dialog.NewProgressInfinite("", "Saving Password", main.index) //lint:ignore SA1019 fyne-io/fyne/issues/2782
+						main.index.progress.Show()
+						defer main.index.progress.Hide()
+
+						i.ID = uuid.New().String()
+						i.Username = rec.Login
+						i.Password = rec.Password
+						i.Domain = rec.URL
+						i.Description = rec.Description
+						var err error
+						i.Password, err = main.index.encryptor.EncryptContent(main.index.password, i.Password)
+						if err != nil {
+							fmt.Println("failed to encrypt password")
+							return
+						}
+						i.GeneratorOptions = g
+						i.CreatedAt = time.Now().Unix()
+						i.UpdatedAt = time.Now().Unix()
+						i.IsStarred = "false"
+						data, err := json.Marshal(i)
+						if err != nil {
+							fmt.Println("failed to marshal encrypted password to JSON")
+							return
+						}
+						err = main.index.dfsAPI.DocPut(main.index.sessionID, utils.PodName, utils.PasswordsTable, data)
+						if err != nil {
+							fmt.Println("failed to save password")
+							return
+						}
+						passwordList = append(passwordList, rec)
+					}
+				}
+				result := fyne.NewStaticResource("CSV", []byte(fmt.Sprintf("%s\n", passwordList)))
+				entry := widget.NewMultiLineEntry()
+				entry.SetText(string(result.StaticContent))
+				w := fyne.CurrentApp().NewWindow(
+					string(result.StaticName)) // show imported data in a separate window
+				w.SetContent(container.NewScroll(entry))
+				w.Resize(fyne.NewSize(600, 400))
+				w.Show()
+			}, main.index.Window)
+		// setup filter to open .csv files only
+		file_Dialog.SetFilter(
+			storage.NewExtensionFileFilter([]string{".csv"}))
+		file_Dialog.Show()
+		// Show file selection dialog.
+	})
+
 	if i.ID == "" {
 		saveBtn := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), func() {
 			main.index.progress = dialog.NewProgressInfinite("", "Saving Password", main.index) //lint:ignore SA1019 fyne-io/fyne/issues/2782
@@ -159,7 +241,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 			main.setContent(passwordsView.view)
 		})
 		saveBtn.Importance = widget.HighImportance
-		top = container.NewBorder(nil, nil, cancelBtn, saveBtn, widget.NewLabel(""))
+		top = container.NewBorder(nil, nil, cancelBtn, saveBtn, importCsvBtn, widget.NewLabel(""))
 	} else {
 		top = container.NewBorder(nil, nil, cancelBtn, nil, widget.NewLabel(""))
 	}
