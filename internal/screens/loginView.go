@@ -61,6 +61,10 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	})
 	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	if i.dfsAPI == nil {
+		i.progress = dialog.NewProgressInfinite("", "Trying to connect to dfs API via BEE", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
+		i.progress.Show()
+		defer i.progress.Hide()
+
 		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		api, err := dfs.NewDfsAPI(
 			i.dataDir,
