@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+       include:
+         - os: linux
+           artifact: fyne-cross/dist/linux-amd64/FairPass.tar.xz
+         - os: windows
+           artifact: fyne-cross/dist/windows-amd64/FairPass.exe.zip
+         - os: android
+           artifact: fyne-cross/dist/android/FairPass.apk
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - name: Install fine-cross compiler
+      run: go install github.com/fyne-io/fyne-cross@v1.1.3
+    - name: Install fyne
+      run: go install fyne.io/fyne/v2/cmd/fyne@latest
+    - name: Set commit hash
+      run: sed -i "s/Commit  = \"none\"/Commit  = \"$(git rev-parse --short HEAD)\"/g" internal/utils/version.go
+    - name: Set tag version
+      run: sed -i "s/Version = \"v0.0.0\"/Version = \"$(git tag)\"/g" internal/utils/version.go
+    - name: Build
+      run: fyne-cross ${{ matrix.os }} -app-id org.fairdatasociety.fairpass -icon icon.png
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: ${{ matrix.artifact }}
