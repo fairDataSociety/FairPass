@@ -7,8 +7,11 @@ on:
     branches: [ master ]
 
 jobs:
-  build_linux:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux, windows, android]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Go
@@ -16,38 +19,8 @@ jobs:
       with:
         go-version: 1.17
     - name: Install fine-cross compiler
-      run: go install github.com/fyne-io/fyne-cross@v1.1.3   
+      run: go install github.com/fyne-io/fyne-cross@v1.1.3
     - name: Install fyne
       run: go install fyne.io/fyne/v2/cmd/fyne@latest
     - name: Build
-      run: fyne-cross linux -app-id org.fairdatasociety.fairpass -icon icon.png
-  
-  build_windows:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-    - name: Install fine-cross compiler
-      run: go install github.com/fyne-io/fyne-cross@v1.1.3    
-    - name: Install fyne
-      run: go install fyne.io/fyne/v2/cmd/fyne@latest
-    - name: Build
-      run: fyne-cross windows -app-id org.fairdatasociety.fairpass -icon icon.png
-
-  build_android:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-    - name: Install fine-cross compiler
-      run: go install github.com/fyne-io/fyne-cross@v1.1.3    
-    - name: Install fyne
-      run: go install fyne.io/fyne/v2/cmd/fyne@latest
-    - name: Build
-      run: fyne-cross android -app-id org.fairdatasociety.fairpass -icon icon.png
+      run: fyne-cross ${{ matrix.os }} -app-id org.fairdatasociety.fairpass -icon icon.png
