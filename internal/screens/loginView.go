@@ -61,6 +61,10 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	})
 	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	if i.dfsAPI == nil {
+		i.progress = dialog.NewProgressInfinite("", "Trying to connect to dfs API via BEE", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
+		i.progress.Show()
+		defer i.progress.Hide()
+
 		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		api, err := dfs.NewDfsAPI(
 			i.dataDir,
@@ -101,7 +105,7 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	password.Hide()
 	var username string
 	loginBtn := widget.NewButton("Login", func() {
-		i.progress = dialog.NewProgressInfinite("", "Login is progress", i)
+		i.progress = dialog.NewProgressInfinite("", "Login is progress", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
 		defer i.progress.Hide()
 		// Do login
@@ -222,7 +226,7 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 		if user.Password == "" {
 			return
 		}
-		i.progress = dialog.NewProgressInfinite("", "Creating User", i.Window)
+		i.progress = dialog.NewProgressInfinite("", "Creating User", i.Window) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
 		// Do signup
 		address, mnemonic, _, err := i.dfsAPI.CreateUser(user.Username, user.Password, "", "")
@@ -329,7 +333,7 @@ func (i *index) importTab(allowBack bool) fyne.CanvasObject {
 		if user.Address == "" {
 			return
 		}
-		i.progress = dialog.NewProgressInfinite("", "Importing user", i)
+		i.progress = dialog.NewProgressInfinite("", "Importing user", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
 		defer i.progress.Hide()
 		// TODO import
