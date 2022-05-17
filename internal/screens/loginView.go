@@ -20,7 +20,6 @@ import (
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/ensm/eth"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/logging"
-	dfsUtils "github.com/fairdatasociety/fairOS-dfs/pkg/utils"
 	"github.com/fairdatasociety/fairpass/internal/utils"
 	"github.com/fairdatasociety/fairpass/internal/utils/crypto"
 	"github.com/sirupsen/logrus"
@@ -91,35 +90,38 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	usernameInput.SetPlaceHolder("username")
 	passwordInput := widget.NewPasswordEntry()
 	passwordInput.SetPlaceHolder("password")
-	var username string
 	loginBtn := widget.NewButton("Login", func() {
 		i.progress = dialog.NewProgressInfinite("", "Login is progress", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
 		defer i.progress.Hide()
 		// Do login
-		ui, _, _, err := i.dfsAPI.LoginUserV2(username, passwordInput.Text, "")
-		if err != nil {
-			fmt.Printf("Login Failed : %s\n", err.Error())
+		if usernameInput.Text == "" {
+			dialog.NewError(utils.ErrBlankUsername, i.Window).Show()
 			return
 		}
-		_, enBytes, err := ui.GetFeed().GetFeedData(dfsUtils.HashString(username), ui.GetAccount().GetAddress(-1))
-		if err != nil {
-			fmt.Printf("Login Failed : %s\n", err.Error())
+		if passwordInput.Text == "" {
+			dialog.NewError(utils.ErrBlankPassword, i.Window).Show()
 			return
 		}
-		i.encryptor = crypto.New(string(enBytes))
+		ui, _, _, err := i.dfsAPI.LoginUserV2(usernameInput.Text, passwordInput.Text, "")
+		if err != nil {
+			dialog.NewError(fmt.Errorf("Login Failed : %s", err.Error()), i.Window).Show()
+			return
+		}
+
+		i.encryptor = &crypto.Encryptor{}
 		i.sessionID = ui.GetSessionId()
 		i.password = passwordInput.Text
 		if !i.dfsAPI.IsPodExist(utils.PodName, i.sessionID) {
 			_, err = i.dfsAPI.CreatePod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
-				fmt.Printf("Create Pod Failed : %s\n", err.Error())
+				dialog.NewError(fmt.Errorf("Create Pod Failed : %s", err.Error()), i.Window).Show()
 				return
 			}
 		} else {
 			_, err = i.dfsAPI.OpenPod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
-				fmt.Printf("Open pod Failed : %s\n", err.Error())
+				dialog.NewError(fmt.Errorf("Open Pod Failed : %s", err.Error()), i.Window).Show()
 				return
 			}
 		}
@@ -130,25 +132,26 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		passwordIndexes["starred"] = collection.StringIndex
 		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.PasswordsTable, passwordIndexes, true)
 		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
-			fmt.Printf("Failed to create doc table : %s\n", err.Error())
+			dialog.NewError(fmt.Errorf("Failed to create doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.PasswordsTable)
 		if err != nil {
-			fmt.Printf("Failed to open doc table : %s\n", err.Error())
+			dialog.NewError(fmt.Errorf("Failed to open doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
+
 		notesIndexes := make(map[string]collection.IndexType)
 		notesIndexes["title"] = collection.StringIndex
 		notesIndexes["starred"] = collection.StringIndex
 		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.NotesTable, notesIndexes, true)
 		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
-			fmt.Printf("Failed to create doc table : %s\n", err.Error())
+			dialog.NewError(fmt.Errorf("Failed to create doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.NotesTable)
 		if err != nil {
-			fmt.Printf("Failed to open doc table : %s\n", err.Error())
+			dialog.NewError(fmt.Errorf("Failed to open doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 
@@ -197,6 +200,19 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 	}
 	passwordEntry.SetPlaceHolder("Password")
 
+	confirmPassword := ""
+	confirmPasswordEntry := widget.NewPasswordEntry()
+	confirmPasswordBind := binding.BindString(&confirmPassword)
+
+	confirmPasswordEntry.Bind(confirmPasswordBind)
+	confirmPasswordEntry.Validator = func(s string) error {
+		if s == "" {
+			return fmt.Errorf("please enter a password")
+		}
+		return nil
+	}
+	confirmPasswordEntry.SetPlaceHolder("Confirm Password")
+
 	form := container.NewVBox(
 		labelWithStyle("Username"),
 		usernameEntry,
@@ -204,20 +220,33 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 		mnemonicEntry,
 		labelWithStyle("Password"),
 		passwordEntry,
+		labelWithStyle("Confirm Password"),
+		confirmPasswordEntry,
 	)
 
 	saveBtn := widget.NewButtonWithIcon("Signup", theme.DocumentSaveIcon(), func() {
 		if user.Username == "" {
+			dialog.NewError(utils.ErrBlankUsername, i.Window).Show()
 			return
 		}
 		if user.Password == "" {
+			dialog.NewError(utils.ErrBlankPassword, i.Window).Show()
+			return
+		}
+		if confirmPassword == "" {
+			dialog.NewError(utils.ErrBlankConfirmPassword, i.Window).Show()
+			return
+		}
+		if user.Password != confirmPassword {
+			dialog.NewError(utils.ErrPasswordMismatch, i.Window).Show()
 			return
 		}
 		i.progress = dialog.NewProgressInfinite("", "Creating User", i.Window) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
 		// Do signup
 		dialogTitle := "Caution !!"
-		confirm := "Yes, I have kept is safe"
+		confirm := "I have kept it safe"
+		headerText := "Please keep the following safe. If these are lost you cannot recover your data."
 		cb := func(b bool) {
 			i.Reload()
 		}
@@ -225,16 +254,15 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 		if err != nil {
 			i.progress.Hide()
 			if err != eth.ErrInsufficientBalance {
-				fmt.Printf("Failed to create user : %s\n", err.Error())
+				dialog.NewError(err, i.Window).Show()
 				return
 			}
 			dialogTitle = "Insufficient balance !!"
-			confirm = "Yes, I will transfer balance to this wallet"
+			headerText = "Wallet needs to be funded before using. Fund the following wallet and try again with the following mnemonic. " + headerText
 			cb = func(b bool) {}
 		}
 		i.progress.Hide()
-		fmt.Printf("%s\n%s\n", user.Username, address)
-		d := dialog.NewCustomConfirm(dialogTitle, confirm, "Cancel", i.displayMnemonic(address, mnemonic), cb, i.Window)
+		d := dialog.NewCustomConfirm(dialogTitle, confirm, "Cancel", i.displayMnemonic(address, mnemonic, headerText), cb, i.Window)
 		d.Show()
 	})
 	saveBtn.Importance = widget.HighImportance
@@ -249,8 +277,8 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 	return container.NewPadded(container.NewBorder(nil, bottom, nil, nil, form))
 }
 
-func (i *index) displayMnemonic(address, mnemonic string) fyne.CanvasObject {
-	header := labelWithStyle("Please keep the following safe. If these are lost you cannot recover your data")
+func (i *index) displayMnemonic(address, mnemonic, headerText string) fyne.CanvasObject {
+	header := labelWithStyle(headerText)
 	addressLabel := widget.NewLabel(address)
 	mnemonicLabel := widget.NewLabel(mnemonic)
 
@@ -282,7 +310,7 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 	beeEntry.SetPlaceHolder("Bee Endpoint")
 	beeEntry.Validator = func(s string) error {
 		if s == "" {
-			return fmt.Errorf("please enter bee endpoint")
+			return utils.ErrBlankBee
 		}
 		return nil
 	}
@@ -291,7 +319,7 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 	stampEntry.SetPlaceHolder("Batch ID")
 	stampEntry.Validator = func(s string) error {
 		if s == "" {
-			return fmt.Errorf("please enter batch ID")
+			return utils.ErrBlankBatchId
 		}
 		return nil
 	}
@@ -300,7 +328,7 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 	rpcEntry.SetPlaceHolder("RPC Endpoint")
 	rpcEntry.Validator = func(s string) error {
 		if s == "" {
-			return fmt.Errorf("please enter rpc endpoint")
+			return utils.ErrBlankRPC
 		}
 		return nil
 	}
@@ -316,24 +344,27 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 
 	saveBtn := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), func() {
 		if i.config.BeeEndpoint == "" {
+			dialog.NewError(utils.ErrBlankBee, i.Window).Show()
 			return
 		}
 		if i.config.BatchId == "" {
+			dialog.NewError(utils.ErrBlankBatchId, i.Window).Show()
 			return
 		}
 		if i.config.RPC == "" {
+			dialog.NewError(utils.ErrBlankRPC, i.Window).Show()
 			return
 		}
 
 		// Save config
 		configBytes, err := json.Marshal(i.config)
 		if err != nil {
-			fmt.Println("config save failed")
+			dialog.NewError(fmt.Errorf("config write failed : %s", err.Error()), i.Window).Show()
 			return
 		}
 		err = ioutil.WriteFile(filepath.Join(i.app.Storage().RootURI().Path(), config), configBytes, 0700)
 		if err != nil {
-			fmt.Println("config write failed ", err)
+			dialog.NewError(fmt.Errorf("config write failed : %s", err.Error()), i.Window).Show()
 			return
 		}
 		i.dfsAPI = nil

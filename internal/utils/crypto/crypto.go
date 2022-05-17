@@ -8,62 +8,91 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	mRand "math/rand"
+	"time"
+
+	"github.com/fairdatasociety/fairOS-dfs/pkg/utils"
 )
 
-type Encryptor struct {
-	encryptedMnemonic string
+const (
+	paddingMin = 300
+	paddingMax = 500
+)
+
+type Crypto interface {
+	EncryptContent(string, string) (string, error)
+	DecryptContent(string, string) (string, error)
+	EncryptContentWithPadding(string, string) (string, error)
+	DecryptContentWithPadding(string, string, int) (string, error)
 }
 
-func New(encryptedMnemonic string) *Encryptor {
-	return &Encryptor{encryptedMnemonic}
-}
+type Encryptor struct{}
 
-func (a *Encryptor) GetEncryptedMnemonic() string {
-	return a.encryptedMnemonic
-}
-
-func (a *Encryptor) EncryptContent(password, content string) (string, error) {
-	mnemonic, err := a.decryptMnemonic(password)
-	if err != nil {
-		return "", fmt.Errorf("load mnemonic: %w", err)
-	}
-	aesKey := sha256.Sum256([]byte(mnemonic))
-
-	// encrypt the mnemonic
-	encryptedContent, err := encrypt(aesKey[:], content)
-	if err != nil {
-		return "", fmt.Errorf("load mnemonic: %w", err)
+func (*Encryptor) DecryptContent(passphrase, encryptedContent string) (string, error) {
+	password := passphrase
+	if password == "" {
+		return "", fmt.Errorf("passphrase cannot be blank")
 	}
 
-	return encryptedContent, nil
-}
-
-func (a *Encryptor) DecryptContent(password, content string) (string, error) {
-	mnemonic, err := a.decryptMnemonic(password)
-	if err != nil {
-		return "", fmt.Errorf("load mnemonic: %w", err)
+	if encryptedContent == "" {
+		return "", fmt.Errorf("invalid encrypted content")
 	}
-	aesKey := sha256.Sum256([]byte(mnemonic))
-
-	//decrypt the message
-	decryptedContent, err := decrypt(aesKey[:], content)
-	if err != nil {
-		return "", err
-	}
-
-	return decryptedContent, nil
-}
-
-func (a *Encryptor) decryptMnemonic(password string) (string, error) {
 	aesKey := sha256.Sum256([]byte(password))
 
 	//decrypt the message
-	mnemonic, err := decrypt(aesKey[:], a.encryptedMnemonic)
+	data, err := decrypt(aesKey[:], encryptedContent)
 	if err != nil {
 		return "", err
 	}
+	return data, nil
+}
 
-	return mnemonic, nil
+func (*Encryptor) EncryptContent(passphrase, data string) (string, error) {
+	password := passphrase
+	if password == "" {
+		return "", fmt.Errorf("passphrase cannot be blank")
+	}
+	aesKey := sha256.Sum256([]byte(password))
+	encryptedMessage, err := encrypt(aesKey[:], data)
+	if err != nil {
+		return "", fmt.Errorf("create user account: %w", err)
+	}
+	return encryptedMessage, nil
+}
+
+func (*Encryptor) DecryptContentWithPadding(passphrase, encryptedContent string, length int) (string, error) {
+	password := passphrase
+	if password == "" {
+		return "", fmt.Errorf("passphrase cannot be blank")
+	}
+
+	if encryptedContent == "" {
+		return "", fmt.Errorf("invalid encrypted content")
+	}
+	aesKey := sha256.Sum256([]byte(password))
+
+	//decrypt the message
+	data, err := decrypt(aesKey[:], encryptedContent)
+	if err != nil {
+		return "", err
+	}
+	return data[:length], nil
+}
+
+func (*Encryptor) EncryptContentWithPadding(passphrase, data string) (string, error) {
+	password := passphrase
+	if password == "" {
+		return "", fmt.Errorf("passphrase cannot be blank")
+	}
+	aesKey := sha256.Sum256([]byte(password))
+	mRand.Seed(time.Now().UnixNano())
+	paddingLength := mRand.Intn(paddingMax-paddingMin) + paddingMin
+	randomStr := utils.GetRandString(paddingLength)
+	encryptedMessage, err := encrypt(aesKey[:], data+randomStr)
+	if err != nil {
+		return "", fmt.Errorf("create user account: %w", err)
+	}
+	return encryptedMessage, nil
 }
 
 func encrypt(key []byte, message string) (encmess string, err error) {
@@ -83,7 +112,6 @@ func encrypt(key []byte, message string) (encmess string, err error) {
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
 
-	//returns to base64 encoded string
 	encmess = base64.URLEncoding.EncodeToString(cipherText)
 	return
 }
