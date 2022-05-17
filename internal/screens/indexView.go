@@ -23,7 +23,7 @@ type index struct {
 	dfsAPI    *dfs.DfsAPI
 	sessionID string
 	password  string
-	encryptor *crypto.Encryptor
+	encryptor crypto.Crypto
 }
 
 func Make(a fyne.App, w fyne.Window) fyne.CanvasObject {

@@ -61,7 +61,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 		passwordBind = binding.BindString(&i.Password)
 	} else {
 		var err error
-		password, err := main.index.encryptor.DecryptContent(main.index.password, i.Password)
+		password, err := main.index.encryptor.DecryptContentWithPadding(main.index.password, i.Password, i.GeneratorOptions.Length)
 		if err != nil {
 			fmt.Println("failed to decrypt password ", err)
 		}
@@ -163,7 +163,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 						i.Domain = rec.URL
 						i.Description = rec.Description
 						var err error
-						i.Password, err = main.index.encryptor.EncryptContent(main.index.password, i.Password)
+						i.Password, err = main.index.encryptor.EncryptContentWithPadding(main.index.password, i.Password)
 						if err != nil {
 							fmt.Println("failed to encrypt password")
 							return
@@ -216,9 +216,8 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 				return
 			}
 			i.ID = uuid.New().String()
-
 			var err error
-			i.Password, err = main.index.encryptor.EncryptContent(main.index.password, i.Password)
+			i.Password, err = main.index.encryptor.EncryptContentWithPadding(main.index.password, i.Password)
 			if err != nil {
 				fmt.Println("failed to save password")
 				return
