@@ -105,7 +105,7 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		}
 		ui, _, _, err := i.dfsAPI.LoginUserV2(usernameInput.Text, passwordInput.Text, "")
 		if err != nil {
-			dialog.NewError(fmt.Errorf("Login Failed : %s", err.Error()), i.Window).Show()
+			dialog.NewError(fmt.Errorf("login Failed : %s", err.Error()), i.Window).Show()
 			return
 		}
 
@@ -115,13 +115,13 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		if !i.dfsAPI.IsPodExist(utils.PodName, i.sessionID) {
 			_, err = i.dfsAPI.CreatePod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
-				dialog.NewError(fmt.Errorf("Create Pod Failed : %s", err.Error()), i.Window).Show()
+				dialog.NewError(fmt.Errorf("create Pod Failed : %s", err.Error()), i.Window).Show()
 				return
 			}
 		} else {
 			_, err = i.dfsAPI.OpenPod(utils.PodName, i.password, i.sessionID)
 			if err != nil {
-				dialog.NewError(fmt.Errorf("Open Pod Failed : %s", err.Error()), i.Window).Show()
+				dialog.NewError(fmt.Errorf("open Pod Failed : %s", err.Error()), i.Window).Show()
 				return
 			}
 		}
@@ -132,12 +132,12 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		passwordIndexes["starred"] = collection.StringIndex
 		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.PasswordsTable, passwordIndexes, true)
 		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
-			dialog.NewError(fmt.Errorf("Failed to create doc table : %s", err.Error()), i.Window).Show()
+			dialog.NewError(fmt.Errorf("failed to create doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.PasswordsTable)
 		if err != nil {
-			dialog.NewError(fmt.Errorf("Failed to open doc table : %s", err.Error()), i.Window).Show()
+			dialog.NewError(fmt.Errorf("failed to open doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 
@@ -146,12 +146,12 @@ func (i *index) initLoginView() fyne.CanvasObject {
 		notesIndexes["starred"] = collection.StringIndex
 		err = i.dfsAPI.DocCreate(i.sessionID, utils.PodName, utils.NotesTable, notesIndexes, true)
 		if err != nil && err != collection.ErrDocumentDBAlreadyPresent {
-			dialog.NewError(fmt.Errorf("Failed to create doc table : %s", err.Error()), i.Window).Show()
+			dialog.NewError(fmt.Errorf("failed to create doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 		err = i.dfsAPI.DocOpen(i.sessionID, utils.PodName, utils.NotesTable)
 		if err != nil {
-			dialog.NewError(fmt.Errorf("Failed to open doc table : %s", err.Error()), i.Window).Show()
+			dialog.NewError(fmt.Errorf("failed to open doc table : %s", err.Error()), i.Window).Show()
 			return
 		}
 
