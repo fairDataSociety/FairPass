@@ -1,6 +1,6 @@
 # FairPass
 
-[![Build](https://github.com/gitcoindev/FairPass/workflows/Build/badge.svg)](https://github.com/gitcoindev/FairPass/actions?query=workflow%3ABuild) [![Test](https://github.com/gitcoindev/FairPass/workflows/Test/badge.svg)](https://github.com/gitcoindev/FairPass/actions?query=workflow%3ATest) [![Static code analysis](https://github.com/gitcoindev/FairPass/workflows/Static%20code%20analysis/badge.svg)](https://github.com/gitcoindev/FairPass/actions?query=workflow%3AStatic%20code%20analysis)
+[![Build](https://github.com/fairDataSociety/FairPass/workflows/Build/badge.svg)](https://github.com/fairDataSociety/FairPass/actions?query=workflow%3ABuild) [![Test](https://github.com/fairDataSociety/FairPass/workflows/Test/badge.svg)](https://github.com/fairDataSociety/FairPass/actions?query=workflow%3ATest) [![Static code analysis](https://github.com/fairDataSociety/FairPass/workflows/Static%20code%20analysis/badge.svg)](https://github.com/fairDataSociety/FairPass/actions?query=workflow%3AStatic%20code%20analysis)
 
 FairPass is a Password Manager build with FairOS on top of swarm. It uses FairOS as a dependency and uses "fairpass" pod
 to save "passwords" and "notes".
@@ -33,13 +33,13 @@ go run main.go
 ## Packaging
 
 ```
-fyne package -os darwin -icon myapp.png
-fyne package -os linux -icon myapp.png
-fyne package -os windows -icon myapp.png
+fyne package -os darwin -icon icon.png
+fyne package -os linux -icon icon.png
+fyne package -os windows -icon icon.png
 
 
-fyne package -os android -appID org.fairdatasociety.fairpass -icon myapp.png 
-fyne package -os ios -appID org.fairdatasociety.fairpass -icon myapp.png
+fyne package -os android -appID org.fairdatasociety.fairpass -icon icon.png 
+fyne package -os ios -appID org.fairdatasociety.fairpass -icon icon.png
 ```
 
 ## Contribute

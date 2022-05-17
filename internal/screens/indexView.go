@@ -1,13 +1,10 @@
 package screens
 
 import (
-	"path/filepath"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/fairdatasociety/fairOS-dfs/pkg/dfs"
-	"github.com/fairdatasociety/fairpass/internal/utils"
 	"github.com/fairdatasociety/fairpass/internal/utils/crypto"
 )
 
@@ -24,20 +21,17 @@ type index struct {
 
 	config    *fairOSConfig
 	dfsAPI    *dfs.DfsAPI
-	dataDir   string
 	sessionID string
 	password  string
 	encryptor *crypto.Encryptor
 }
 
 func Make(a fyne.App, w fyne.Window) fyne.CanvasObject {
-	installationLocation := a.Storage().RootURI().Path()
-	dataDir := filepath.Join(installationLocation, utils.DataDirName)
+	//installationLocation := a.Storage().RootURI().Path()
 	i := &index{
-		Window:  w,
-		app:     a,
-		dataDir: dataDir,
-		config:  &fairOSConfig{},
+		Window: w,
+		app:    a,
+		config: &fairOSConfig{},
 	}
 	i.view = container.NewMax(i.initLoginView())
 	return i.view
