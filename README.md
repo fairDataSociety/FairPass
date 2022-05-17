@@ -33,13 +33,13 @@ go run main.go
 ## Packaging
 
 ```
-fyne package -os darwin -icon myapp.png
-fyne package -os linux -icon myapp.png
-fyne package -os windows -icon myapp.png
+fyne package -os darwin -icon icon.png
+fyne package -os linux -icon icon.png
+fyne package -os windows -icon icon.png
 
 
-fyne package -os android -appID org.fairdatasociety.fairpass -icon myapp.png 
-fyne package -os ios -appID org.fairdatasociety.fairpass -icon myapp.png
+fyne package -os android -appID org.fairdatasociety.fairpass -icon icon.png 
+fyne package -os ios -appID org.fairdatasociety.fairpass -icon icon.png
 ```
 
 ## Contribute

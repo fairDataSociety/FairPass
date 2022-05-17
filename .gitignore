@@ -17,3 +17,4 @@
 .idea
 *.apk
 fairpass**
+.DS_Store
