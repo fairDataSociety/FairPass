@@ -71,7 +71,7 @@ func (main *mainView) initMainView() {
 		var modal *widget.PopUp
 		c := container.NewVBox()
 		c.Add(widget.NewButton("Password", func() {
-			main.setContent(main.makeAddPasswordView(nil))
+			main.setContent(main.makeAddPasswordView(nil, true))
 			modal.Hide()
 		}))
 		c.Add(widget.NewButton("Notes", func() {
