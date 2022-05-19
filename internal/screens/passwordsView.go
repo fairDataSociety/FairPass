@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/fairdatasociety/fairpass/internal/utils"
 )
@@ -30,9 +31,10 @@ func newListView(mainView *mainView) *listView {
 			items = append(items, r)
 		}
 	}
+
 	table := widget.NewTable(
 		func() (int, int) {
-			return len(items) + 1, 5
+			return len(items) + 1, 7
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("wide content")
@@ -51,6 +53,10 @@ func newListView(mainView *mainView) *listView {
 					label.SetText("Password")
 				case 4:
 					label.SetText("Info")
+				case 5:
+					label.SetText("Edit")
+				case 6:
+					label.SetText("Delete")
 				}
 				return
 			}
@@ -65,8 +71,12 @@ func newListView(mainView *mainView) *listView {
 				label.SetText(items[id.Row-1].Username)
 			case 3:
 				label.SetText("Copy")
-			default:
+			case 4:
 				label.SetText("View")
+			case 5:
+				label.SetText("Edit")
+			default:
+				label.SetText("Delete")
 			}
 		},
 	)
@@ -101,8 +111,25 @@ func newListView(mainView *mainView) *listView {
 				Title:   "FairPass",
 				Content: "Password copied to clipboard",
 			})
+		case 4:
+			mainView.setContent(mainView.makeAddPasswordView(items[id.Row-1], false))
+		case 5:
+			mainView.setContent(mainView.makeAddPasswordView(items[id.Row-1], true))
 		default:
-			mainView.setContent(mainView.makeAddPasswordView(items[id.Row-1]))
+			dialog.NewConfirm("Delete Password", "Are you sure?", func(choice bool) {
+				if choice {
+					err = mainView.index.dfsAPI.DocDel(mainView.index.sessionID, utils.PodName, utils.PasswordsTable, items[id.Row-1].ID)
+					if err != nil {
+						fmt.Println("failed to delete password ", err)
+						return
+					}
+					passwordsView := newListView(mainView)
+					mainView.setContent(passwordsView.view)
+					return
+				}
+				table.UnselectAll()
+			}, mainView.index.Window).Show()
+
 		}
 	}
 

@@ -27,7 +27,7 @@ type PasswordRecord struct {
 	Password    string
 }
 
-func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
+func (main *mainView) makeAddPasswordView(i *password, editable bool) fyne.CanvasObject {
 	if i == nil {
 		i = &password{}
 	}
@@ -101,7 +101,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 		d.Show()
 	})
 	var passwordObject fyne.CanvasObject
-	if i.ID != "" {
+	if !editable {
 		websiteEntry.Disable()
 		usernameEntry.Disable()
 		passwordEntry.Disable()
@@ -201,7 +201,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 		// Show file selection dialog.
 	})
 
-	if i.ID == "" {
+	if editable {
 		saveBtn := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), func() {
 			main.index.progress = dialog.NewProgressInfinite("", "Saving Password", main.index) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 			main.index.progress.Show()
@@ -215,7 +215,9 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 			if i.Password == "" {
 				return
 			}
-			i.ID = uuid.New().String()
+			if i.ID == "" {
+				i.ID = uuid.New().String()
+			}
 			var err error
 			i.Password, err = main.index.encryptor.EncryptContentWithPadding(main.index.password, i.Password)
 			if err != nil {
