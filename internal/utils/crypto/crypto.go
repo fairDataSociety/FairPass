@@ -8,22 +8,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	mRand "math/rand"
-	"time"
-
-	"github.com/fairdatasociety/fairOS-dfs/pkg/utils"
-)
-
-const (
-	paddingMin = 300
-	paddingMax = 500
 )
 
 type Crypto interface {
 	EncryptContent(string, string) (string, error)
 	DecryptContent(string, string) (string, error)
-	EncryptContentWithPadding(string, string) (string, error)
-	DecryptContentWithPadding(string, string, int) (string, error)
 }
 
 type Encryptor struct{}
@@ -54,41 +43,6 @@ func (*Encryptor) EncryptContent(passphrase, data string) (string, error) {
 	}
 	aesKey := sha256.Sum256([]byte(password))
 	encryptedMessage, err := encrypt(aesKey[:], data)
-	if err != nil {
-		return "", fmt.Errorf("create user account: %w", err)
-	}
-	return encryptedMessage, nil
-}
-
-func (*Encryptor) DecryptContentWithPadding(passphrase, encryptedContent string, length int) (string, error) {
-	password := passphrase
-	if password == "" {
-		return "", fmt.Errorf("passphrase cannot be blank")
-	}
-
-	if encryptedContent == "" {
-		return "", fmt.Errorf("invalid encrypted content")
-	}
-	aesKey := sha256.Sum256([]byte(password))
-
-	//decrypt the message
-	data, err := decrypt(aesKey[:], encryptedContent)
-	if err != nil {
-		return "", err
-	}
-	return data[:length], nil
-}
-
-func (*Encryptor) EncryptContentWithPadding(passphrase, data string) (string, error) {
-	password := passphrase
-	if password == "" {
-		return "", fmt.Errorf("passphrase cannot be blank")
-	}
-	aesKey := sha256.Sum256([]byte(password))
-	mRand.Seed(time.Now().UnixNano())
-	paddingLength := mRand.Intn(paddingMax-paddingMin) + paddingMin
-	randomStr := utils.GetRandString(paddingLength)
-	encryptedMessage, err := encrypt(aesKey[:], data+randomStr)
 	if err != nil {
 		return "", fmt.Errorf("create user account: %w", err)
 	}

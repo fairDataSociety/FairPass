@@ -102,7 +102,7 @@ func newListView(mainView *mainView) *listView {
 				Content: "Username copied to clipboard",
 			})
 		case 3:
-			password, err := mainView.index.encryptor.DecryptContentWithPadding(mainView.index.password, items[id.Row-1].Password, items[id.Row-1].GeneratorOptions.Length)
+			password, err := mainView.index.encryptor.DecryptContent(mainView.index.password, items[id.Row-1].Password)
 			if err != nil {
 				fmt.Println("failed to decrypt password ", err)
 			}
