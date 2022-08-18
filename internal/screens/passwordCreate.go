@@ -27,7 +27,7 @@ type PasswordRecord struct {
 	Password    string
 }
 
-func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
+func (main *mainView) makeAddPasswordView(i *password, editable bool) fyne.CanvasObject {
 	if i == nil {
 		i = &password{}
 	}
@@ -61,7 +61,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 		passwordBind = binding.BindString(&i.Password)
 	} else {
 		var err error
-		password, err := main.index.encryptor.DecryptContentWithPadding(main.index.password, i.Password, i.GeneratorOptions.Length)
+		password, err := main.index.encryptor.DecryptContent(main.index.password, i.Password)
 		if err != nil {
 			fmt.Println("failed to decrypt password ", err)
 		}
@@ -101,7 +101,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 		d.Show()
 	})
 	var passwordObject fyne.CanvasObject
-	if i.ID != "" {
+	if !editable {
 		websiteEntry.Disable()
 		usernameEntry.Disable()
 		passwordEntry.Disable()
@@ -163,7 +163,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 						i.Domain = rec.URL
 						i.Description = rec.Description
 						var err error
-						i.Password, err = main.index.encryptor.EncryptContentWithPadding(main.index.password, i.Password)
+						i.Password, err = main.index.encryptor.EncryptContent(main.index.password, i.Password)
 						if err != nil {
 							fmt.Println("failed to encrypt password")
 							return
@@ -201,7 +201,7 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 		// Show file selection dialog.
 	})
 
-	if i.ID == "" {
+	if editable {
 		saveBtn := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), func() {
 			main.index.progress = dialog.NewProgressInfinite("", "Saving Password", main.index) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 			main.index.progress.Show()
@@ -215,9 +215,11 @@ func (main *mainView) makeAddPasswordView(i *password) fyne.CanvasObject {
 			if i.Password == "" {
 				return
 			}
-			i.ID = uuid.New().String()
+			if i.ID == "" {
+				i.ID = uuid.New().String()
+			}
 			var err error
-			i.Password, err = main.index.encryptor.EncryptContentWithPadding(main.index.password, i.Password)
+			i.Password, err = main.index.encryptor.EncryptContent(main.index.password, i.Password)
 			if err != nil {
 				fmt.Println("failed to save password")
 				return

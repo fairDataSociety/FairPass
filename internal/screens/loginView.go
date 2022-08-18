@@ -58,14 +58,10 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	})
 	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	if i.dfsAPI == nil {
-		logger := logging.New(os.Stdout, logrus.ErrorLevel)
-		ensConfig := &contracts.Config{
-			ENSRegistryAddress:        utils.EnsRegistryAddress,
-			SubdomainRegistrarAddress: utils.SubdomainRegistrarAddress,
-			PublicResolverAddress:     utils.PublicResolverAddress,
-			ProviderDomain:            utils.ProviderDomain,
-			ProviderBackend:           i.config.RPC,
-		}
+		logger := logging.New(os.Stdout, logrus.DebugLevel)
+		// testnet config
+		ensConfig := contracts.TestnetConfig()
+		ensConfig.ProviderBackend = i.config.RPC
 		api, err := dfs.NewDfsAPI(
 			"",
 			i.config.BeeEndpoint,

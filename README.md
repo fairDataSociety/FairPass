@@ -38,8 +38,7 @@ fyne package -os linux -icon icon.png
 fyne package -os windows -icon icon.png
 
 
-fyne package -os android -appID org.fairdatasociety.fairpass -icon icon.png 
-fyne package -os ios -appID org.fairdatasociety.fairpass -icon icon.png
+fyne package -os android -appID org.fairdatasociety.fairpass
 ```
 
 ## Contribute

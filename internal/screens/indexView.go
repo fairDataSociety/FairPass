@@ -20,7 +20,7 @@ type index struct {
 	progress dialog.Dialog
 
 	config    *fairOSConfig
-	dfsAPI    *dfs.DfsAPI
+	dfsAPI    *dfs.API
 	sessionID string
 	password  string
 	encryptor crypto.Crypto
