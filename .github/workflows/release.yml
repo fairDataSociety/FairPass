@@ -21,6 +21,7 @@ jobs:
            arch: multiple
            artifact: fyne-cross/dist/android/FairPass.apk
          - os: darwin
+           arch: amd64,arm64
            artifact: |
              fyne-cross/dist/darwin-amd64/FairPass.app
              fyne-cross/dist/darwin-arm64/FairPass.app
