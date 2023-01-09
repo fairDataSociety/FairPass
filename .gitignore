@@ -18,3 +18,4 @@
 *.apk
 fairpass**
 .DS_Store
+fyne-cross
