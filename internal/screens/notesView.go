@@ -17,22 +17,29 @@ type notesListView struct {
 	mainView *mainView
 }
 
+var (
+	cachedNotes []*note
+)
+
 func newNotesListView(mainView *mainView) *notesListView {
-	items := []*note{}
-	list, err := mainView.index.dfsAPI.DocFind(mainView.index.sessionID, utils.PodName, utils.NotesTable, "id>0", 100)
-	if err == nil {
-		for _, v := range list {
-			r := &note{}
-			err := json.Unmarshal(v, r)
-			if err != nil {
-				continue
+	if cachedNotes == nil {
+		items := []*note{}
+		list, err := mainView.index.dfsAPI.DocFind(mainView.index.sessionID, utils.PodName, utils.NotesTable, "id>0", 100)
+		if err == nil {
+			for _, v := range list {
+				r := &note{}
+				err := json.Unmarshal(v, r)
+				if err != nil {
+					continue
+				}
+				items = append(items, r)
 			}
-			items = append(items, r)
 		}
+		cachedNotes = items
 	}
 	table := widget.NewTable(
 		func() (int, int) {
-			return len(items) + 1, 3
+			return len(cachedNotes) + 1, 3
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("wide content")
@@ -57,7 +64,7 @@ func newNotesListView(mainView *mainView) *notesListView {
 			case 0:
 				label.SetText(fmt.Sprintf("%d", id.Row))
 			case 1:
-				label.SetText(items[id.Row-1].Title)
+				label.SetText(cachedNotes[id.Row-1].Title)
 			default:
 				label.SetText("View")
 			}
@@ -67,12 +74,12 @@ func newNotesListView(mainView *mainView) *notesListView {
 		if id.Row == 0 {
 			return
 		}
-		mainView.setContent(mainView.makeAddNoteView(items[id.Row-1]))
+		mainView.setContent(mainView.makeAddNoteView(cachedNotes[id.Row-1]))
 	}
 
 	return &notesListView{
 		BaseWidget: widget.BaseWidget{},
-		items:      items,
+		items:      cachedNotes,
 		mainView:   mainView,
 		view:       table,
 	}
