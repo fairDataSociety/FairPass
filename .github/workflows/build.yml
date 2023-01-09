@@ -17,9 +17,9 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17
-    - name: Install fine-cross compiler
-      run: go install github.com/fyne-io/fyne-cross@v1.1.3
+        go-version: 1.18
+    - name: Install fyne-cross compiler
+      run: go install github.com/fyne-io/fyne-cross@latest
     - name: Install fyne
       run: go install fyne.io/fyne/v2/cmd/fyne@latest
     - name: Build
