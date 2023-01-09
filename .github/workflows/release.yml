@@ -54,6 +54,8 @@ jobs:
               fyne-cross/dist/darwin-arm64/FairPass.app
     steps:
       - uses: actions/checkout@v2
+      - name: Install docker
+        run: brew install docker
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
