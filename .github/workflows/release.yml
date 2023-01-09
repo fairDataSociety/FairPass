@@ -70,30 +70,17 @@ jobs:
         run: sed -i '' "s/Version = \"v0.0.0\"/Version = \"$(git tag)\"/g" internal/utils/version.go
       - name: Build
         run: fyne-cross ${{ matrix.os }} -arch ${{ matrix.arch }} -app-id org.fairdatasociety.fairpass -icon icon.png
-      - name: Make amd64 dmg
+      - name: Make dmg
         run: |
-          dd if=/dev/zero of=/tmp/FairPass-amd64.dmg bs=1m count=16
-          mkfs.hfsplus -v FairPass-amd64 /tmp/FairPass-amd64.dmg
+          hdiutil create tmp.dmg -ov -volname "FairPass" -fs HFS+ -srcfolder fyne-cross/dist/darwin-arm64/FairPass.app
+          hdiutil convert tmp.dmg -format UDZO -o  FairPass-arm64.dmg
+          mv FairPass-arm64.dmg fyne-cross/dist/darwin-arm64/FairPass-arm64.dmg
+          rm tmp.dmg
           
-          sudo mkdir -pv /mnt/tmp
-          sudo mount -o loop /tmp/FairPass-amd64.dmg /mnt/tmp
-          sudo cp -av fyne-cross/dist/darwin-amd64/FairPass.app /mnt/tmp
-          
-          sudo umount /mnt/tmp
-          
-          cp /tmp/FairPass-amd64.dmg fyne-cross/dist/darwin-amd64/FairPass-amd64.dmg
-      - name: Make arm64 dmg
-        run: |
-          dd if=/dev/zero of=/tmp/FairPass-arm64.dmg bs=1m count=16
-          mkfs.hfsplus -v FairPass-arm64 /tmp/FairPass-arm64.dmg
-
-          sudo mkdir -pv /mnt/tmp
-          sudo mount -o loop /tmp/FairPass-arm64.dmg /mnt/tmp
-          sudo cp -av fyne-cross/dist/darwin-arm64/FairPass.app /mnt/tmp
-
-          sudo umount /mnt/tmp
-
-          cp /tmp/FairPass-arm64.dmg fyne-cross/dist/darwin-arm64/FairPass-arm64.dmg
+          hdiutil create tmp.dmg -ov -volname "FairPass" -fs HFS+ -srcfolder fyne-cross/dist/darwin-amd64/FairPass.app
+          hdiutil convert tmp.dmg -format UDZO -o  FairPass-amd64.dmg
+          mv FairPass-amd64.dmg fyne-cross/dist/darwin-amd64/FairPass-amd64.dmg
+          rm tmp.dmg
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
