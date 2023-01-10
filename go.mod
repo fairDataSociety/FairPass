@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	fyne.io/fyne/v2 v2.3.0
-	github.com/fairdatasociety/fairOS-dfs v0.9.0-rc9.0.20230109043341-85c31b77707a
+	github.com/fairdatasociety/fairOS-dfs v0.9.2-rc2
 	github.com/google/uuid v1.3.0
 	github.com/sethvargo/go-password v0.2.0
 	github.com/sirupsen/logrus v1.9.0
