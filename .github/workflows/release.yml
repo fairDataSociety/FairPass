@@ -12,10 +12,13 @@ jobs:
       matrix:
        include:
          - os: linux
+           arch: amd64
            artifact: fyne-cross/dist/linux-amd64/FairPass.tar.xz
          - os: windows
+           arch: amd64
            artifact: fyne-cross/dist/windows-amd64/FairPass.exe.zip
          - os: android
+           arch: multiple
            artifact: fyne-cross/dist/android/FairPass.apk
     steps:
     - uses: actions/checkout@v2
@@ -23,8 +26,8 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.18
-    - name: Install fine-cross compiler
-      run: go install github.com/fyne-io/fyne-cross@v1.1.3
+    - name: Install fyne-cross compiler
+      run: go install github.com/fyne-io/fyne-cross@latest
     - name: Install fyne
       run: go install fyne.io/fyne/v2/cmd/fyne@latest
     - name: Set commit hash
@@ -32,9 +35,54 @@ jobs:
     - name: Set tag version
       run: sed -i "s/Version = \"v0.0.0\"/Version = \"$(git tag)\"/g" internal/utils/version.go
     - name: Build
-      run: fyne-cross ${{ matrix.os }} -app-id org.fairdatasociety.fairpass -icon icon.png
+      run: fyne-cross ${{ matrix.os }} -arch ${{ matrix.arch }} -app-id org.fairdatasociety.fairpass -icon icon.png
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: ${{ matrix.artifact }}
+
+  build-mac:
+    runs-on: macos-11
+    strategy:
+      matrix:
+        include:
+          - os: darwin
+            arch: amd64,arm64
+            artifact: |
+              fyne-cross/dist/darwin-amd64/FairPass-amd64.dmg
+              fyne-cross/dist/darwin-arm64/FairPass-arm64.dmg
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install docker
+        run: brew install docker
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+      - name: Install fyne-cross compiler
+        run: go install github.com/fyne-io/fyne-cross@latest
+      - name: Install fyne
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+      - name: Set commit hash
+        run: sed -i '' "s/Commit  = \"none\"/Commit  = \"$(git rev-parse --short HEAD)\"/g" internal/utils/version.go
+      - name: Set tag version
+        run: sed -i '' "s/Version = \"v0.0.0\"/Version = \"$(git tag)\"/g" internal/utils/version.go
+      - name: Build
+        run: fyne-cross ${{ matrix.os }} -arch ${{ matrix.arch }} -app-id org.fairdatasociety.fairpass -icon icon.png
+      - name: Make dmg
+        run: |
+          hdiutil create tmp.dmg -ov -volname "FairPass" -fs HFS+ -srcfolder fyne-cross/dist/darwin-arm64/FairPass.app
+          hdiutil convert tmp.dmg -format UDZO -o  FairPass-arm64.dmg
+          mv FairPass-arm64.dmg fyne-cross/dist/darwin-arm64/FairPass-arm64.dmg
+          rm tmp.dmg
+          
+          hdiutil create tmp.dmg -ov -volname "FairPass" -fs HFS+ -srcfolder fyne-cross/dist/darwin-amd64/FairPass.app
+          hdiutil convert tmp.dmg -format UDZO -o  FairPass-amd64.dmg
+          mv FairPass-amd64.dmg fyne-cross/dist/darwin-amd64/FairPass-amd64.dmg
+          rm tmp.dmg
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.artifact }}
