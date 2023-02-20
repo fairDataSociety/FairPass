@@ -18,6 +18,14 @@ type Crypto interface {
 type Encryptor struct{}
 
 func (*Encryptor) DecryptContent(passphrase, encryptedContent string) (string, error) {
+	return DecryptContent(passphrase, encryptedContent)
+}
+
+func (*Encryptor) EncryptContent(passphrase, encryptedContent string) (string, error) {
+	return EncryptContent(passphrase, encryptedContent)
+}
+
+func DecryptContent(passphrase, encryptedContent string) (string, error) {
 	password := passphrase
 	if password == "" {
 		return "", fmt.Errorf("passphrase cannot be blank")
@@ -29,24 +37,15 @@ func (*Encryptor) DecryptContent(passphrase, encryptedContent string) (string, e
 	aesKey := sha256.Sum256([]byte(password))
 
 	//decrypt the message
-	data, err := decrypt(aesKey[:], encryptedContent)
-	if err != nil {
-		return "", err
-	}
-	return data, nil
+	return decrypt(aesKey[:], encryptedContent)
 }
-
-func (*Encryptor) EncryptContent(passphrase, data string) (string, error) {
+func EncryptContent(passphrase, data string) (string, error) {
 	password := passphrase
 	if password == "" {
 		return "", fmt.Errorf("passphrase cannot be blank")
 	}
 	aesKey := sha256.Sum256([]byte(password))
-	encryptedMessage, err := encrypt(aesKey[:], data)
-	if err != nil {
-		return "", fmt.Errorf("create user account: %w", err)
-	}
-	return encryptedMessage, nil
+	return encrypt(aesKey[:], data)
 }
 
 func encrypt(key []byte, message string) (encmess string, err error) {
