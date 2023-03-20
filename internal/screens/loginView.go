@@ -60,12 +60,13 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	if i.dfsAPI == nil {
 		logger := logging.New(os.Stdout, logrus.DebugLevel)
 		// testnet config
-		ensConfig := contracts.TestnetConfig()
+		ensConfig, _ := contracts.TestnetConfig()
 		ensConfig.ProviderBackend = i.config.RPC
 		api, err := dfs.NewDfsAPI(
 			i.config.BeeEndpoint,
 			i.config.BatchId,
 			ensConfig,
+			nil,
 			logger,
 		)
 		if err != nil {
@@ -110,12 +111,6 @@ func (i *index) initLoginView() fyne.CanvasObject {
 			_, err = i.dfsAPI.CreatePod(utils.PodName, i.sessionID)
 			if err != nil {
 				dialog.NewError(fmt.Errorf("create Pod Failed : %s", err.Error()), i.Window).Show()
-				return
-			}
-		} else {
-			_, err = i.dfsAPI.OpenPod(utils.PodName, i.sessionID)
-			if err != nil {
-				dialog.NewError(fmt.Errorf("open Pod Failed : %s", err.Error()), i.Window).Show()
 				return
 			}
 		}

@@ -112,7 +112,7 @@ func (main *mainView) initMainView() {
 	}
 	main.listItem = list
 	main.sidebar = container.NewPadded(container.NewMax(container.NewBorder(nil, widget.NewLabel(fmt.Sprintf("%s-%s", utils.Version, utils.Commit)), nil, nil, container.NewMax(list))))
-	intro := widget.NewLabel("Now store Passwords with FirePass in the Swarm")
+	intro := widget.NewLabel("Now store Passwords with FairPass in the Swarm")
 	main.content = container.NewBorder(nil, bottomContent, nil, nil, container.NewCenter(container.NewVBox(intro)))
 	split := container.NewHSplit(main.sidebar, main.content)
 	split.Offset = 0.3
