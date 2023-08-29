@@ -4,7 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"fyne.io/fyne/v2/layout"
+
+	"fyne.io/fyne/v2/theme"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/fairdatasociety/fairpass/internal/utils"
@@ -13,22 +18,26 @@ import (
 type listView struct {
 	widget.BaseWidget
 
-	view     *widget.Table
+	view     fyne.CanvasObject
 	items    []*password
 	mainView *mainView
 }
 
 var (
 	cachedPasswords []*password
+	searchTerm      string
 )
 
-func newListView(mainView *mainView, forceUpdate bool) *listView {
+func newListView(mainView *mainView, forceUpdate bool, expr string) *listView {
 	if cachedPasswords == nil {
 		forceUpdate = true
 	}
 	if forceUpdate {
 		items := []*password{}
-		list, err := mainView.index.dfsAPI.DocFind(mainView.index.sessionID, utils.PodName, utils.PasswordsTable, "id>0", 100)
+		if expr == "" {
+			expr = "domain=>"
+		}
+		list, err := mainView.index.dfsAPI.DocFind(mainView.index.sessionID, utils.PodName, utils.PasswordsTable, expr, 100)
 		if err == nil {
 			for _, v := range list {
 				r := &password{}
@@ -132,7 +141,7 @@ func newListView(mainView *mainView, forceUpdate bool) *listView {
 						fmt.Println("failed to delete password ", err)
 						return
 					}
-					passwordsView := newListView(mainView, true)
+					passwordsView := newListView(mainView, true, "")
 					mainView.setContent(passwordsView.view)
 					return
 				}
@@ -142,11 +151,28 @@ func newListView(mainView *mainView, forceUpdate bool) *listView {
 		}
 	}
 
+	searchEntry := widget.NewEntry()
+	searchEntry.SetPlaceHolder("Search...")
+	searchEntry.OnChanged = func(s string) {
+		searchTerm = s
+	}
+	searchEntry.SetText(searchTerm)
+	searchButton := widget.NewButtonWithIcon("", theme.SearchIcon(), func() {
+		// TODO search
+		fmt.Println("search")
+		expr = ""
+		if searchTerm != "" {
+			expr = "domain=>" + searchTerm
+		}
+		newListView(mainView, true, expr)
+	})
+	topContent := container.NewPadded(searchEntry, container.New(layout.NewHBoxLayout(), layout.NewSpacer(), searchButton))
+
 	return &listView{
 		BaseWidget: widget.BaseWidget{},
 		items:      cachedPasswords,
 		mainView:   mainView,
-		view:       table,
+		view:       container.NewBorder(topContent, nil, nil, nil, table),
 	}
 }
 

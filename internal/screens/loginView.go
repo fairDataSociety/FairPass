@@ -88,6 +88,10 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	usernameInput.SetPlaceHolder("username")
 	passwordInput := widget.NewPasswordEntry()
 	passwordInput.SetPlaceHolder("password")
+
+	usernameInput.SetText("check")
+	passwordInput.SetText("passwordpassword")
+
 	loginBtn := widget.NewButton("Login", func() {
 		i.progress = dialog.NewProgressInfinite("", "Login is progress", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
