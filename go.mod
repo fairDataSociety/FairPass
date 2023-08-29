@@ -5,8 +5,8 @@ go 1.20
 require (
 	fyne.io/fyne/v2 v2.3.5
 	github.com/fairdatasociety/fairOS-dfs v0.9.6
-	github.com/google/uuid v1.3.0
-	github.com/sethvargo/go-password v0.2.0
+	github.com/google/uuid v1.3.1
+	github.com/sethvargo/go-password v0.2.1-0.20221026161242-a12c199499e5
 	github.com/sirupsen/logrus v1.9.3
 )
 
