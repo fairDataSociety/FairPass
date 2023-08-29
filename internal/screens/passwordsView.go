@@ -158,8 +158,6 @@ func newListView(mainView *mainView, forceUpdate bool, expr string) *listView {
 	}
 	searchEntry.SetText(searchTerm)
 	searchButton := widget.NewButtonWithIcon("", theme.SearchIcon(), func() {
-		// TODO search
-		fmt.Println("search")
 		expr = ""
 		if searchTerm != "" {
 			expr = "domain=>" + searchTerm
