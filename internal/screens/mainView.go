@@ -103,7 +103,7 @@ func (main *mainView) initMainView() {
 	list.OnSelected = func(id widget.ListItemID) {
 		switch id {
 		case 0:
-			passwordsView := newListView(main, false)
+			passwordsView := newListView(main, false, "")
 			main.setContent(passwordsView.view)
 		case 1:
 			notesView := newNotesListView(main, false)
