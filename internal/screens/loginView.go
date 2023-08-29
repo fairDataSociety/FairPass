@@ -60,8 +60,8 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	if i.dfsAPI == nil {
 		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		// testnet config
-		//ensConfig, _ := contracts.TestnetConfig(contracts.Sepolia)
-		ensConfig, _ := contracts.PlayConfig()
+		ensConfig, _ := contracts.TestnetConfig(contracts.Sepolia)
+		//ensConfig, _ := contracts.PlayConfig()
 		ensConfig.ProviderBackend = i.config.RPC
 		api, err := dfs.NewDfsAPI(
 			context.TODO(),
