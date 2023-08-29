@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -41,7 +40,7 @@ type userRequest struct {
 
 func (i *index) initLoginView() fyne.CanvasObject {
 	// load config
-	data, err := ioutil.ReadFile(filepath.Join(i.app.Storage().RootURI().Path(), config))
+	data, err := os.ReadFile(filepath.Join(i.app.Storage().RootURI().Path(), config))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return i.initConfigView(false)
@@ -59,7 +58,7 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	})
 	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	if i.dfsAPI == nil {
-		logger := logging.New(os.Stdout, logrus.DebugLevel)
+		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		// testnet config
 		//ensConfig, _ := contracts.TestnetConfig(contracts.Sepolia)
 		ensConfig, _ := contracts.PlayConfig()
@@ -88,6 +87,10 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	usernameInput.SetPlaceHolder("username")
 	passwordInput := widget.NewPasswordEntry()
 	passwordInput.SetPlaceHolder("password")
+
+	usernameInput.SetText("check")
+	passwordInput.SetText("passwordpassword")
+
 	loginBtn := widget.NewButton("Login", func() {
 		i.progress = dialog.NewProgressInfinite("", "Login is progress", i) //lint:ignore SA1019 fyne-io/fyne/issues/2782
 		i.progress.Show()
@@ -356,7 +359,7 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 			dialog.NewError(fmt.Errorf("config write failed : %s", err.Error()), i.Window).Show()
 			return
 		}
-		err = ioutil.WriteFile(filepath.Join(i.app.Storage().RootURI().Path(), config), configBytes, 0700)
+		err = os.WriteFile(filepath.Join(i.app.Storage().RootURI().Path(), config), configBytes, 0700)
 		if err != nil {
 			dialog.NewError(fmt.Errorf("config write failed : %s", err.Error()), i.Window).Show()
 			return

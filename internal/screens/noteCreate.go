@@ -54,7 +54,7 @@ func (main *mainView) makeAddNoteView(i *note) fyne.CanvasObject {
 	)
 
 	cancelBtn := widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-		notesView := newNotesListView(main)
+		notesView := newNotesListView(main, false)
 		main.setContent(notesView.view)
 	})
 
@@ -92,7 +92,7 @@ func (main *mainView) makeAddNoteView(i *note) fyne.CanvasObject {
 				fmt.Println("failed to save note :", err.Error())
 				return
 			}
-			notesView := newNotesListView(main)
+			notesView := newNotesListView(main, true)
 			main.setContent(notesView.view)
 		})
 		saveBtn.Importance = widget.HighImportance

@@ -5,8 +5,8 @@ go 1.20
 require (
 	fyne.io/fyne/v2 v2.3.5
 	github.com/fairdatasociety/fairOS-dfs v0.9.6
-	github.com/google/uuid v1.3.0
-	github.com/sethvargo/go-password v0.2.0
+	github.com/google/uuid v1.3.1
+	github.com/sethvargo/go-password v0.2.1-0.20221026161242-a12c199499e5
 	github.com/sirupsen/logrus v1.9.3
 )
 
@@ -84,7 +84,7 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/exp v0.0.0-20230810033253-352e893a4cad // indirect
-	golang.org/x/image v0.3.0 // indirect
+	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
