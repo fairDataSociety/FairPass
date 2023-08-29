@@ -123,7 +123,7 @@ func (main *mainView) makeAddPasswordView(i *password, editable bool) fyne.Canva
 	)
 
 	cancelBtn := widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-		passwordsView := newListView(main)
+		passwordsView := newListView(main, false)
 		main.setContent(passwordsView.view)
 	})
 
@@ -238,7 +238,7 @@ func (main *mainView) makeAddPasswordView(i *password, editable bool) fyne.Canva
 				fmt.Println("failed to save password")
 				return
 			}
-			passwordsView := newListView(main)
+			passwordsView := newListView(main, true)
 			main.setContent(passwordsView.view)
 		})
 		saveBtn.Importance = widget.HighImportance

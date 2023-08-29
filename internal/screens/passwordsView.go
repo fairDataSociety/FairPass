@@ -22,8 +22,11 @@ var (
 	cachedPasswords []*password
 )
 
-func newListView(mainView *mainView) *listView {
+func newListView(mainView *mainView, forceUpdate bool) *listView {
 	if cachedPasswords == nil {
+		forceUpdate = true
+	}
+	if forceUpdate {
 		items := []*password{}
 		list, err := mainView.index.dfsAPI.DocFind(mainView.index.sessionID, utils.PodName, utils.PasswordsTable, "id>0", 100)
 		if err == nil {
@@ -38,7 +41,6 @@ func newListView(mainView *mainView) *listView {
 		}
 		cachedPasswords = items
 	}
-
 	table := widget.NewTable(
 		func() (int, int) {
 			return len(cachedPasswords) + 1, 7
@@ -130,7 +132,7 @@ func newListView(mainView *mainView) *listView {
 						fmt.Println("failed to delete password ", err)
 						return
 					}
-					passwordsView := newListView(mainView)
+					passwordsView := newListView(mainView, true)
 					mainView.setContent(passwordsView.view)
 					return
 				}

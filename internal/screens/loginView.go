@@ -59,7 +59,7 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	})
 	topContent := container.NewPadded(container.New(layout.NewHBoxLayout(), layout.NewSpacer(), configButton))
 	if i.dfsAPI == nil {
-		logger := logging.New(os.Stdout, logrus.DebugLevel)
+		logger := logging.New(os.Stdout, logrus.ErrorLevel)
 		// testnet config
 		//ensConfig, _ := contracts.TestnetConfig(contracts.Sepolia)
 		ensConfig, _ := contracts.PlayConfig()

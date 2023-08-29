@@ -21,7 +21,10 @@ var (
 	cachedNotes []*note
 )
 
-func newNotesListView(mainView *mainView) *notesListView {
+func newNotesListView(mainView *mainView, forceReload bool) *notesListView {
+	if cachedNotes == nil {
+		forceReload = true
+	}
 	if cachedNotes == nil {
 		items := []*note{}
 		list, err := mainView.index.dfsAPI.DocFind(mainView.index.sessionID, utils.PodName, utils.NotesTable, "id>0", 100)
