@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -41,7 +40,7 @@ type userRequest struct {
 
 func (i *index) initLoginView() fyne.CanvasObject {
 	// load config
-	data, err := ioutil.ReadFile(filepath.Join(i.app.Storage().RootURI().Path(), config))
+	data, err := os.ReadFile(filepath.Join(i.app.Storage().RootURI().Path(), config))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return i.initConfigView(false)
@@ -360,7 +359,7 @@ func (i *index) initConfigView(allowBack bool) fyne.CanvasObject {
 			dialog.NewError(fmt.Errorf("config write failed : %s", err.Error()), i.Window).Show()
 			return
 		}
-		err = ioutil.WriteFile(filepath.Join(i.app.Storage().RootURI().Path(), config), configBytes, 0700)
+		err = os.WriteFile(filepath.Join(i.app.Storage().RootURI().Path(), config), configBytes, 0700)
 		if err != nil {
 			dialog.NewError(fmt.Errorf("config write failed : %s", err.Error()), i.Window).Show()
 			return
