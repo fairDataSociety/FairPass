@@ -1,6 +1,7 @@
 package screens
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -60,9 +61,11 @@ func (i *index) initLoginView() fyne.CanvasObject {
 	if i.dfsAPI == nil {
 		logger := logging.New(os.Stdout, logrus.DebugLevel)
 		// testnet config
-		ensConfig, _ := contracts.TestnetConfig()
+		//ensConfig, _ := contracts.TestnetConfig(contracts.Sepolia)
+		ensConfig, _ := contracts.PlayConfig()
 		ensConfig.ProviderBackend = i.config.RPC
 		api, err := dfs.NewDfsAPI(
+			context.TODO(),
 			i.config.BeeEndpoint,
 			i.config.BatchId,
 			ensConfig,
@@ -98,11 +101,13 @@ func (i *index) initLoginView() fyne.CanvasObject {
 			dialog.NewError(utils.ErrBlankPassword, i.Window).Show()
 			return
 		}
-		ui, _, _, err := i.dfsAPI.LoginUserV2(usernameInput.Text, passwordInput.Text, "")
+		lr, err := i.dfsAPI.LoginUserV2(usernameInput.Text, passwordInput.Text, "")
 		if err != nil {
 			dialog.NewError(fmt.Errorf("login Failed : %s", err.Error()), i.Window).Show()
 			return
 		}
+
+		ui := lr.UserInfo
 
 		i.encryptor = &crypto.Encryptor{}
 		i.sessionID = ui.GetSessionId()
@@ -239,7 +244,7 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 		cb := func(b bool) {
 			i.Reload()
 		}
-		address, mnemonic, _, _, _, err := i.dfsAPI.CreateUserV2(user.Username, user.Password, user.Mnemonic, "")
+		rr, err := i.dfsAPI.CreateUserV2(user.Username, user.Password, user.Mnemonic, "")
 		if err != nil {
 			i.progress.Hide()
 			if err != eth.ErrInsufficientBalance {
@@ -251,7 +256,7 @@ func (i *index) signupTab(allowBack bool) fyne.CanvasObject {
 			cb = func(b bool) {}
 		}
 		i.progress.Hide()
-		d := dialog.NewCustomConfirm(dialogTitle, confirm, "Cancel", i.displayMnemonic(address, mnemonic, headerText), cb, i.Window)
+		d := dialog.NewCustomConfirm(dialogTitle, confirm, "Cancel", i.displayMnemonic(rr.Address, rr.Mnemonic, headerText), cb, i.Window)
 		d.Show()
 	})
 	saveBtn.Importance = widget.HighImportance
